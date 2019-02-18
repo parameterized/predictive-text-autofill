@@ -1,0 +1,61 @@
+
+<head>
+		<title>Predictive Text Autofill</title>
+	</head>
+	<body>
+		<form id='mainForm'>
+			<textarea id='mainInput' style='width: 300px; height: 150px;'></textarea>
+			<button type='submit'>Submit</button>
+		</form>
+		<div style='width: 800px;'>
+			<p id='resText' style='white-space: pre-wrap;'></p>
+		</div>
+		
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>
+		<script>
+			$('#mainInput').val('Predictive Text Game Jam\n\nThe name of the game is {}\n\nThe games core mechanic is {}\n\nThe setting for the game is {}');
+
+			function gen(seed, chunks) {
+				if (seed == '') {
+					$('#resText').text(chunks[0] + '...');
+					if (chunks.length == 1) {
+						seed = chunks[0];
+						$.ajax({
+							method: 'POST',
+							url: 'http://localhost:8080/gen',
+							contentType: 'application/json',
+							data: JSON.stringify({ seed: seed }),
+							success: function(data) {
+								var fillText = data.text.split('\n')[0].split('.')[0];
+								$('#resText').text(seed + fillText);
+							}
+						});
+						return;
+					}
+					seed += chunks.shift();
+				}
+				$.ajax({
+					method: 'POST',
+					url: 'http://localhost:8080/gen',
+					contentType: 'application/json',
+					data: JSON.stringify({ seed: seed }),
+					success: function(data) {
+						var fillText = data.text.split('\n')[0].split('.')[0];
+						if (chunks.length == 1) {
+							$('#resText').text(seed + fillText + chunks[0]);
+						} else {
+							seed += fillText + chunks.shift();
+							$('#resText').text(seed + '...');
+							gen(seed, chunks);
+						}
+					}
+				});
+			}
+
+			$('#mainForm').on('submit', function() {
+				event.preventDefault();
+				var template = $('#mainInput').val();
+				gen('', template.split('{}'));
+			});
+		</script>
+	</body>
