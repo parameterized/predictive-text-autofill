@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import win_unicode_console
+win_unicode_console.streams.stdout_text_transcoded.buffer = win_unicode_console.streams.stdout_text_str
 win_unicode_console.enable()
 
 import json
@@ -79,5 +80,5 @@ def gen():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
+    app.run(port=8080)
 
